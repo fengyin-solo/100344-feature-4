@@ -46,15 +46,18 @@
           <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
-            <button
-              v-for="action in actions"
-              :key="action"
-              class="link"
-              type="button"
-              @click="runAction(action, row)"
-            >
-              {{ action }}
-            </button>
+            <template v-if="availableActions(row).length">
+              <button
+                v-for="action in availableActions(row)"
+                :key="action"
+                class="link"
+                type="button"
+                @click="runAction(action, row)"
+              >
+                {{ action }}
+              </button>
+            </template>
+            <span v-else class="muted">—</span>
           </td>
         </tr>
         <tr v-if="!rows.length">
@@ -82,9 +85,10 @@ import {
 import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('lookout')
-const columns = ["瞭望台编号", "所在山头", "海拔高度", "视野覆盖面积", "瞭望员", "通讯方式", "设备配置", "运行状态"]
-const actions = ["记录值守", "登记故障", "关闭瞭望台"]
-const statuses = ["正常值守", "临时关闭", "设备故障", "维修中"]
+// 列与动作都跟着模块元数据走，状态机（transitions）调整后页面不用再改。
+const columns = meta.fields
+const actions = meta.actions
+const statuses = meta.statuses
 const stats = [{"label": "瞭望台总数", "value": 0}, {"label": "正常值守数", "value": 0}, {"label": "故障台数", "value": 0}]
 
 const rows = ref<EntryRow[]>([])
@@ -98,6 +102,14 @@ const statusSummary = computed(() =>
     count: rows.value.filter((row) => String(row.status) === status).length,
   })),
 )
+
+// 按单向状态机只放行当前状态能发起的动作；已关闭的瞭望台没有任何可执行动作。
+function availableActions(row: EntryRow): string[] {
+  return actions.filter((action) => {
+    const allowedFrom = meta.transitions?.[action]
+    return !allowedFrom || allowedFrom.includes(String(row.status))
+  })
+}
 
 function resetFilters() {
   filters.value = {}

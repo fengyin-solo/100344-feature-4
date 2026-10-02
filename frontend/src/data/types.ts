@@ -18,6 +18,10 @@ export type ModuleMeta = {
   actions: string[]
   actionTargets: Record<string, string>
   metrics: string[]
+  // 动作 -> 允许发起该动作的起始状态白名单；配置后不在白名单内的状态一律拒绝（禁止越级流转）。
+  transitions?: Record<string, string[]>
+  // 哪些状态算「待处理」；不配置时沿用「非末态即待处理」的旧规则。
+  pendingWhen?: string[]
 }
 
 export type PageResult = {

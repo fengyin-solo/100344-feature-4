@@ -27,6 +27,7 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .data-table th, .data-table td { border: 1px solid var(--border); padding: 8px 10px; font-size: 13px; text-align: left; }
 .empty-state { text-align: center; color: var(--muted); }
 .row-actions { display: flex; gap: 6px; }
+.muted { color: var(--muted); }
 .btn { border: 1px solid var(--border); background: #fff; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
 .btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
 .btn.ghost { background: transparent; }
