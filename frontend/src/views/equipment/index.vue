@@ -47,7 +47,7 @@
           <td>{{ row.status }}</td>
           <td class="row-actions">
             <button
-              v-for="action in actions"
+              v-for="action in actionsFor(row)"
               :key="action"
               class="link"
               type="button"
@@ -55,6 +55,7 @@
             >
               {{ action }}
             </button>
+            <span v-if="!actionsFor(row).length" class="muted">—</span>
           </td>
         </tr>
         <tr v-if="!rows.length">
@@ -74,6 +75,7 @@
 import { computed, onMounted, ref } from 'vue'
 
 import {
+  availableActions,
   downloadEntries,
   listEntries,
   moduleMeta,
@@ -83,9 +85,13 @@ import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('equipment')
 const columns = ["装备编号", "装备名称", "装备类型", "规格型号", "保管林场", "购入日期", "最近检修日", "装备状态"]
-const actions = ["领用装备", "送检登记", "报废装备"]
-const statuses = ["可用", "已领用", "待检修", "已报废"]
+const actions = ["领用装备", "送检登记", "报废装备", "归还器材"]
+const statuses = ["可用", "已领用", "待检修", "已报废", "待归还"]
 const stats = [{"label": "装备总数", "value": 0}, {"label": "可用装备", "value": 0}, {"label": "待检修数", "value": 0}]
+
+function actionsFor(row: EntryRow): string[] {
+  return availableActions(meta, String(row.status))
+}
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)

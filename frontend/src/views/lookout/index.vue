@@ -47,7 +47,7 @@
           <td>{{ row.status }}</td>
           <td class="row-actions">
             <button
-              v-for="action in actions"
+              v-for="action in actionsFor(row)"
               :key="action"
               class="link"
               type="button"
@@ -55,6 +55,7 @@
             >
               {{ action }}
             </button>
+            <span v-if="!actionsFor(row).length" class="muted">—</span>
           </td>
         </tr>
         <tr v-if="!rows.length">
@@ -74,6 +75,7 @@
 import { computed, onMounted, ref } from 'vue'
 
 import {
+  availableActions,
   downloadEntries,
   listEntries,
   moduleMeta,
@@ -83,9 +85,14 @@ import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('lookout')
 const columns = ["瞭望台编号", "所在山头", "海拔高度", "视野覆盖面积", "瞭望员", "通讯方式", "设备配置", "运行状态"]
-const actions = ["记录值守", "登记故障", "关闭瞭望台"]
+// 单向流转：值守→故障→维修中→恢复值守；临时关闭是侧支，维修期间维持维修中态、不另做关闭。
+const actions = ["记录值守", "登记故障", "关闭瞭望台", "开始维修", "维修完成"]
 const statuses = ["正常值守", "临时关闭", "设备故障", "维修中"]
 const stats = [{"label": "瞭望台总数", "value": 0}, {"label": "正常值守数", "value": 0}, {"label": "故障台数", "value": 0}]
+
+function actionsFor(row: EntryRow): string[] {
+  return availableActions(meta, String(row.status))
+}
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
